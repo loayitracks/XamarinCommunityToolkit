@@ -283,7 +283,10 @@ namespace Xamarin.CommunityToolkit.UI.Views
 		protected virtual void Play()
 		{
 			var audioSession = AVAudioSession.SharedInstance();
-			var err = audioSession.SetCategory(AVAudioSession.CategoryPlayback);
+			//var err = audioSession.SetCategory(AVAudioSession.CategoryPlayback);
+			var err = audioSession.SetCategory(
+				AVAudioSessionCategory.PlayAndRecord | AVAudioSessionCategory.Playback, 
+				AVAudioSessionCategoryOptions.AllowBluetooth | AVAudioSessionCategoryOptions.DefaultToSpeaker);
 
 			if (err != null)
 				Log.Warning("MediaElement", "Failed to set AVAudioSession Category {0}", err.Code);
@@ -346,10 +349,9 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					avPlayerViewController.Player?.Seek(CMTime.Zero);
 					Controller.CurrentState = MediaElementState.Stopped;
 
-					var err = AVAudioSession.SharedInstance().SetActive(false);
-
-					if (err != null)
-						Log.Warning("MediaElement", "Failed to set AVAudioSession Inactive {0}", err.Code);
+					//var err = AVAudioSession.SharedInstance().SetActive(false);
+					//if (err != null)
+					//	Log.Warning("MediaElement", "Failed to set AVAudioSession Inactive {0}", err.Code);
 
 					break;
 			}
@@ -392,7 +394,7 @@ namespace Xamarin.CommunityToolkit.UI.Views
 						avPlayerViewController?.Player?.Pause();
 
 					avPlayerViewController?.Player?.ReplaceCurrentItemWithPlayerItem(null);
-					AVAudioSession.SharedInstance().SetActive(false);
+					//AVAudioSession.SharedInstance().SetActive(false);
 				}
 
 				DestroyPlayedToEndObserver();

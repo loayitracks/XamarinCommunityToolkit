@@ -74,7 +74,9 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					}
 					else if (uriSource.Uri != null)
 					{
-						asset = AVUrlAsset.Create(NSUrl.FromString(uriSource.Uri.AbsoluteUri));
+						var str = NSUrl.FromString(uriSource.Uri.AbsoluteUri);
+						if(str != null)
+							asset = AVUrlAsset.Create(str);
 					}
 					else
 					{
@@ -83,7 +85,7 @@ namespace Xamarin.CommunityToolkit.UI.Views
 				}
 				else
 				{
-					if (Element.Source is XCT.FileMediaSource fileSource)
+					if (Element.Source is XCT.FileMediaSource fileSource && fileSource.File != null)
 						asset = AVAsset.FromUrl(NSUrl.FromFilename(fileSource.File));
 				}
 

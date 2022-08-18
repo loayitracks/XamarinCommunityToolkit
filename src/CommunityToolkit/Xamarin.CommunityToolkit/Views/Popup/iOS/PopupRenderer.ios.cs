@@ -180,7 +180,8 @@ namespace Xamarin.CommunityToolkit.UI.Views
 
 		void SetLayout()
 		{
-			((UIPopoverPresentationController)PresentationController).SourceRect = new CGRect(0, 0, PreferredContentSize.Width, PreferredContentSize.Height);
+			if (PresentationController != null)
+				((UIPopoverPresentationController)PresentationController).SourceRect = new CGRect(0, 0, PreferredContentSize.Width, PreferredContentSize.Height);
 
 			_ = Element ?? throw new InvalidOperationException($"{nameof(Element)} cannot be null");
 			if (Element.Anchor == null)
@@ -199,25 +200,31 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					_ => 0f
 				};
 
-				PopoverPresentationController.SourceRect = new CGRect(originX, originY, 0, 0);
-				PopoverPresentationController.PermittedArrowDirections = 0;
+				if (PopoverPresentationController != null)
+				{
+					PopoverPresentationController.SourceRect = new CGRect(originX, originY, 0, 0);
+					PopoverPresentationController.PermittedArrowDirections = 0;
+				}
 			}
 			else
 			{
 				var view = Platform.GetRenderer(Element.Anchor).NativeView;
-				PopoverPresentationController.SourceView = view;
-				PopoverPresentationController.SourceRect = view.Bounds;
-				var arrowDirection = Specifics.GetArrowDirection(Element);
-				PopoverPresentationController.PermittedArrowDirections = arrowDirection switch
+				if (PopoverPresentationController != null)
 				{
-					PopoverArrowDirection.Up => UIPopoverArrowDirection.Up,
-					PopoverArrowDirection.Down => UIPopoverArrowDirection.Down,
-					PopoverArrowDirection.Left => UIPopoverArrowDirection.Left,
-					PopoverArrowDirection.Right => UIPopoverArrowDirection.Right,
-					PopoverArrowDirection.Any => UIPopoverArrowDirection.Any,
-					PopoverArrowDirection.Unknown => UIPopoverArrowDirection.Unknown,
-					_ => 0
-				};
+					PopoverPresentationController.SourceView = view;
+					PopoverPresentationController.SourceRect = view.Bounds;
+					var arrowDirection = Specifics.GetArrowDirection(Element);
+					PopoverPresentationController.PermittedArrowDirections = arrowDirection switch
+					{
+						PopoverArrowDirection.Up => UIPopoverArrowDirection.Up,
+						PopoverArrowDirection.Down => UIPopoverArrowDirection.Down,
+						PopoverArrowDirection.Left => UIPopoverArrowDirection.Left,
+						PopoverArrowDirection.Right => UIPopoverArrowDirection.Right,
+						PopoverArrowDirection.Any => UIPopoverArrowDirection.Any,
+						PopoverArrowDirection.Unknown => UIPopoverArrowDirection.Unknown,
+						_ => 0
+					};
+				}
 			}
 		}
 
@@ -243,10 +250,12 @@ namespace Xamarin.CommunityToolkit.UI.Views
 		{
 			var popOverDelegate = new PopoverDelegate();
 			popOverDelegate.PopoverDismissed += HandlePopoverDelegateDismissed;
+			if (PresentationController != null)
+			{
+				((UIPopoverPresentationController)PresentationController).SourceView = ViewController?.View ?? throw new NullReferenceException();
 
-			((UIPopoverPresentationController)PresentationController).SourceView = ViewController?.View ?? throw new NullReferenceException();
-
-			((UIPopoverPresentationController)PresentationController).Delegate = popOverDelegate;
+				((UIPopoverPresentationController)PresentationController).Delegate = popOverDelegate;
+			}
 		}
 
 		void HandlePopoverDelegateDismissed(object? sender, UIPresentationController e)
@@ -284,9 +293,12 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					Element.PropertyChanged -= OnElementPropertyChanged;
 					Element = null;
 
-					var presentationController = (UIPopoverPresentationController)PresentationController;
-					if (presentationController != null)
-						presentationController.Delegate = null;
+					if (PresentationController != null)
+					{
+						var presentationController = (UIPopoverPresentationController)PresentationController;
+						if (presentationController != null)
+							presentationController.Delegate = null;
+					}
 				}
 			}
 

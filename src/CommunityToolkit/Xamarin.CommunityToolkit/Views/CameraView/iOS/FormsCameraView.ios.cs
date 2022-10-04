@@ -264,13 +264,15 @@ namespace Xamarin.CommunityToolkit.UI.Views
 				captureSession.AddOutput(videoOutput);
 
 			var audioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
-			if (audioDevice != null)
-			{
-				var audioInput = AVCaptureDeviceInput.FromDevice(audioDevice);
-				if (audioInput != null && captureSession.CanAddInput(audioInput))
-					captureSession.AddInput(audioInput);
-			}
-			captureSession.CommitConfiguration();
+            if (audioDevice != null)
+            {
+                var audioInput = AVCaptureDeviceInput.FromDevice(audioDevice);
+
+                if (audioInput != null && captureSession.CanAddInput(audioInput))
+                    captureSession.AddInput(audioInput);
+            }
+
+            captureSession.CommitConfiguration();
 
 			IsBusy = true;
 			try

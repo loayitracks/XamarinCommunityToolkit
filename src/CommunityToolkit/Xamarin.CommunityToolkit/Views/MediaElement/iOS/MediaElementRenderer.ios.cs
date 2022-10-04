@@ -74,10 +74,10 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					}
 					else if (uriSource.Uri != null)
 					{
-						var str = NSUrl.FromString(uriSource.Uri.AbsoluteUri);
-						if(str != null)
-							asset = AVUrlAsset.Create(str);
-					}
+                        var nsUrl = NSUrl.FromString(uriSource.Uri.AbsoluteUri) ??
+                                throw new NullReferenceException("NSUrl is null");
+                        asset = AVUrlAsset.Create(nsUrl);
+                    }
 					else
 					{
 						throw new InvalidOperationException($"{nameof(uriSource.Uri)} is not initialized");
@@ -196,10 +196,15 @@ namespace Xamarin.CommunityToolkit.UI.Views
 		{
 			get
 			{
-				if (avPlayerViewController?.Player?.CurrentTime.IsInvalid ?? true)
+				if (avPlayerViewController.Player?.CurrentItem == null)
 					return TimeSpan.Zero;
 
-				return TimeSpan.FromSeconds(avPlayerViewController.Player.CurrentTime.Seconds);
+				var currentTime = avPlayerViewController.Player.CurrentTime;
+
+				if (double.IsNaN(currentTime.Seconds) || currentTime.IsIndefinite)
+					return TimeSpan.Zero;
+
+				return TimeSpan.FromSeconds(currentTime.Seconds);
 			}
 		}
 

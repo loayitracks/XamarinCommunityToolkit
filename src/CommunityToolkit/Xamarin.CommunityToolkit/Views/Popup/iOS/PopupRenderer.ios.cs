@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using CoreGraphics;
+using Intents;
 using UIKit;
 using Xamarin.CommunityToolkit.Helpers;
 using Xamarin.CommunityToolkit.PlatformConfiguration.iOSSpecific;
@@ -180,10 +181,12 @@ namespace Xamarin.CommunityToolkit.UI.Views
 
 		void SetLayout()
 		{
-			if (PresentationController != null)
-				((UIPopoverPresentationController)PresentationController).SourceRect = new CGRect(0, 0, PreferredContentSize.Width, PreferredContentSize.Height);
+            if (PresentationController == null || PopoverPresentationController == null)
+                return;
 
-			_ = Element ?? throw new InvalidOperationException($"{nameof(Element)} cannot be null");
+            ((UIPopoverPresentationController)PresentationController).SourceRect = new CGRect(0, 0, PreferredContentSize.Width, PreferredContentSize.Height);
+
+            _ = Element ?? throw new InvalidOperationException($"{nameof(Element)} cannot be null");
 			if (Element.Anchor == null)
 			{
 				var originY = Element.VerticalOptions.Alignment switch
@@ -200,14 +203,13 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					_ => 0f
 				};
 
-				if (PopoverPresentationController != null)
-				{
-					PopoverPresentationController.SourceRect = new CGRect(originX, originY, 0, 0);
-					PopoverPresentationController.PermittedArrowDirections = 0;
-				}
-			}
-			else
-			{
+
+                PopoverPresentationController.SourceRect = new CGRect(originX, originY, 0, 0);
+                PopoverPresentationController.PermittedArrowDirections = 0;
+            }
+
+            else
+            {
 				var view = Platform.GetRenderer(Element.Anchor).NativeView;
 				if (PopoverPresentationController != null)
 				{
@@ -248,6 +250,10 @@ namespace Xamarin.CommunityToolkit.UI.Views
 
 		void SetPresentationController()
 		{
+
+			if (PresentationController == null)
+				return;
+
 			var popOverDelegate = new PopoverDelegate();
 			popOverDelegate.PopoverDismissed += HandlePopoverDelegateDismissed;
 			if (PresentationController != null)
@@ -293,13 +299,9 @@ namespace Xamarin.CommunityToolkit.UI.Views
 					Element.PropertyChanged -= OnElementPropertyChanged;
 					Element = null;
 
-					if (PresentationController != null)
-					{
-						var presentationController = (UIPopoverPresentationController)PresentationController;
-						if (presentationController != null)
-							presentationController.Delegate = null;
-					}
-				}
+                    if (PresentationController is UIPopoverPresentationController presentationController)
+                        presentationController.Delegate = null;
+                }
 			}
 
 			base.Dispose(disposing);
